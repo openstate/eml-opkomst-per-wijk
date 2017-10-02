@@ -111,19 +111,27 @@ def parse_eml_file(file_path):
                     post_code = u'-'
             else:
                 post_code = '-'
+            total_votes = 0
             for selection in ruv.xpath('.//eml:Selection[eml:AffiliationIdentifier]', namespaces=namespaces):
                 party = u''.join(
                     selection.xpath(
                         './eml:AffiliationIdentifier/eml:RegisteredName//text()',
                         namespaces=namespaces))
-                votes = u''.join(selection.xpath('./eml:ValidVotes//text()', namespaces=namespaces))
-                result.append([county,buro,post_code,party,votes])
+                try:
+                    total_votes += int(
+                        u''.join(selection.xpath(
+                            './eml:ValidVotes//text()',
+                            namespaces=namespaces)))
+                except ValueError:
+                    pass
+            result.append([county, buro, post_code, str(total_votes)])
         # pprint(xml)
     return result
 
+
 def main():
     writer = UnicodeWriter(sys.stdout)
-    writer.writerow(["gemeente","stembureau","postcode","partij","stemmen"])
+    writer.writerow(["gemeente","stembureau","postcode","stemmen"])
     for file_path in get_file_paths():
         rows = parse_eml_file(file_path)
         writer.writerows(rows)
