@@ -102,6 +102,7 @@ class UnicodeWriter:
 
 
 def get_zip_code(place):
+    sleep(1)
     place.get_details()
     # if we do not have an address info then return nothing
     if u'address_components' not in place.details:
@@ -148,7 +149,7 @@ def main():
     for row in reader:
         result = find_voting_place(row)
         writer.writerow(result)
-        sleep(5)
+        sleep(1)
     return 0
 
 if __name__ == '__main__':
