@@ -23,6 +23,29 @@ def find_place_by_postcode(places, postcode, source_field=u'postcode'):
         return candidate_places[0]
 
 
+def get_score(name1, name2):
+    parts1 = re.split(r'\s+', name1)
+    parts2 = re.split(r'\s+', name2)
+    intersection = list(set(parts1) & set(parts2))
+    union = list(set(parts1) | set(parts2))
+    return float(len(intersection))/float(len(union))
+
+
+def find_place_by_muni_and_name(places, muni, name):
+    candidate_places = [p for p in places if p[u'plaats'] == muni]
+    clean_name = re.sub(
+        r'^Stembureau\s+', u'',
+        re.sub(r'\(postcode:\s*(\d{4})\s*(\w{2})\)', u'',  name))
+    place = None
+    max_score = 0.0
+    for p in candidate_places:
+        score = get_score(p['stembureau'], clean_name)
+        if (score > 0.0) and (score > max_score):
+            place = p
+            max_score = score
+    return place
+
+
 def main():
     if len(sys.argv) < 3:
         print >>sys.stderr, "Usage: merge.py <file1> <file2>"
@@ -45,6 +68,9 @@ def main():
         elif result[u'postcode_google'] != u'':
             place = find_place_by_postcode(
                 places, re.sub(r'\s+', u'', result[u'postcode']))
+        if place is None:
+            place = find_place_by_muni_and_name(
+                places, result[u'gemeente'], result[u'stembureau'])
         result_row = deepcopy(row)
         if place is not None:
             result_row.append(place[u'stembureau'])
