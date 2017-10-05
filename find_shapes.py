@@ -22,8 +22,8 @@ def get_shapes(shape_file):
 
 
 def main():
-    if len(sys.argv) < 4:
-        print >>sys.stderr, "Usage: merge.py <shape_file> <lat_field> <lon_field>"
+    if len(sys.argv) < 6:
+        print >>sys.stderr, "Usage: merge.py <shape_file> <lat_field> <lon_field> <lat_fallbck> <lon_fallback>"
         return 1
 
     reader = UnicodeReader(sys.stdin)
@@ -39,14 +39,20 @@ def main():
 
     lat_field = sys.argv[2]
     lon_field = sys.argv[3]
+    lat_fb_field = sys.argv[4]
+    lon_fb_field = sys.argv[5]
 
     for row in reader:
         out_row = deepcopy(row)
         data = dict(zip(header, row))
-        # TODO: find fallback fields for this
         if (data[lon_field] != u'-') and (data[lat_field] != u''):
-            point = shapely.geometry.Point(
-                float(data[lat_field]), float(data[lon_field]))
+            lat = data[lat_field]
+            lon = data[lon_field]
+        else:
+            lat = data[lat_fb_field]
+            lon = data[lon_fb_field]
+        if (lat != u'-') and (lon != u'-'):
+            point = shapely.geometry.Point(float(lat), float(lon))
             for shape, props in shapes:
                 if shape.contains(point):
                     for fld in [
