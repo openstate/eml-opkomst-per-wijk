@@ -3,7 +3,7 @@ click-plugins==1.0.3
 cligj==0.4.0
 enum34==1.1.6
 Fiona==1.7.9.post1
-lxml==4.0.0
+lxml==4.9.1
 munch==2.2.0
 python-google-places==1.4.0
 Shapely==1.6.1
